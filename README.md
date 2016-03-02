@@ -5,7 +5,7 @@ NeXt UI Toolkit `bower` and `npm` distribution. You can install this package eit
 ### bower
 
 ```shell
-bower install next
+bower install NeXt
 ```
 
 Then add a `<script>` to your `index.html`:
