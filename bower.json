@@ -12,5 +12,9 @@
     "topology",
     "SDN"
   ],
+  "dependencies": {
+  },
+  "ignore": [],
+  "version": "0.9.0",
   "license": "EPL-1.0"
 }
