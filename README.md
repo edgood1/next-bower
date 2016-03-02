@@ -11,6 +11,6 @@ bower install NeXt
 Then add a `<script>` to your `index.html`:
 
 ```html
-<script src="/bower_components/next/next.js"></script>
+<script src="/bower_components/next-bower/js/next.js"></script>
 ```
 
