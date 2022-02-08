@@ -3802,7 +3802,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
 .n-topology-tooltip {
   padding: 0px;
   opacity: 0.8 !important;
-  max-height: 450px;
+  max-height: 550px;
 }
 .n-topology-tooltip-header {
   min-width: 160px;
@@ -3818,7 +3818,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
 }
 .n-topology-tooltip-header-text {
   line-height: 24px;
-  color: #333;
+  color: #0066cc;
   font-size: 14px;
   font-weight: bold;
 }
@@ -4559,12 +4559,12 @@ input[type="button"].btn-block {
   display: none;
 }
 .popover {
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
   z-index: 1010;
   display: none;
-  max-width: 276px;
+  max-width: 376px;
   padding: 1px;
   text-align: left;
   background-color: #ffffff;
