@@ -8859,7 +8859,8 @@ var nx = {
             props: {
                 'class': 'popover fade',
                 style: {
-                    outline: "none"
+                    outline: "none",
+                    opacity: 1,
                 },
                 tabindex: -1
             },
@@ -9680,6 +9681,7 @@ var nx = {
                     this['_data-id'] = value;
                 }
             }
+
         },
         view: {
             tag: 'svg:g'
@@ -10414,6 +10416,7 @@ var nx = {
                     var matrixString = "matrix(" + nx.geometry.Matrix.stringify(matrix) + ")";
                     dom.style.transform = matrixString;
                     dom.setAttribute('transform', ' translate(' + matrixObject.x() + ', ' + matrixObject.y() + ') scale(' + matrixObject.scale() + ')');
+
                     this._matrix = matrix;
                 }
             },
@@ -22876,12 +22879,15 @@ var nx = {
             node: {
                 set: function (value) {
                     var model = value.model();
-                    this.view('list').set('items', new nx.data.Dictionary(model.getData()));
+                    this.url(model._data.url);
+                    var data = new nx.data.Dictionary(model.getData());
                     this.title(value.label());
+                    this.view('list').set('items', data);
                 }
             },
             topology: {},
-            title: {}
+            title: {},
+            url: {}
         },
         view: {
             content: [
@@ -22892,14 +22898,20 @@ var nx = {
                     },
                     content: [
                         {
-                            tag: 'span',
+                            tag: 'a',
                             props: {
-                                'class': 'n-topology-tooltip-header-text'
+                                'class': 'n-topology-tooltip-header-text',
+                                'href': '{#url}'
                             },
                             name: 'title',
-                            content: '{#title}'
+                            content: '{#title}',
+                            events: { 
+                                click: '{#_click}',
+                                //mouseenter: '{#_mouseenter}',
+                                //mouseleave: '{#_mouseleave}'
+                            }
                         }
-                    ]
+                    ],
                 },
                 {
                     name: 'content',
@@ -22940,7 +22952,18 @@ var nx = {
             init: function (args) {
                 this.inherited(args);
                 this.sets(args);
-            }
+            },
+            _click: function (sender, events) {
+                window.location.href = this.url();
+            },
+            _mouseenter: function (sender, events) {
+                window.status = this.url();
+                return true;
+            },
+            _mouseleave: function (sender, events) {
+                window.status = "";
+                return true;
+            },
         }
     });
 })(nx, nx.global);
@@ -26246,17 +26269,18 @@ var nx = {
                             'click': '{#_agr}',
                             'touchend': '{#_agr}'
                         }
-                    }, {
-                        tag: 'li',
-                        name: 'fullscreen',
-                        props: {
-                            'class': 'n-topology-nav-full n-icon-fullscreen',
-                            title: 'Enter full screen mode'
-                        },
-                        events: {
-                            'click': '{#_full}',
-                            'touchend': '{#_full}'
-                        }
+                    // Commented full screen Icon
+                    //}, {
+                    //    tag: 'li',
+                    //    name: 'fullscreen',
+                    //    props: {
+                    //        'class': 'n-topology-nav-full n-icon-fullscreen',
+                    //        title: 'Enter full screen mode'
+                    //    },
+                    //    events: {
+                    //        'click': '{#_full}',
+                    //        'touchend': '{#_full}'
+                    //    }
                     }, {
                         tag: 'li',
                         name: 'setting',
@@ -26280,6 +26304,56 @@ var nx = {
                                 lazyClose: true
                             },
                             content: [{
+                                tag: 'h5',
+                                content: "Layout Type :"
+                            }, {
+                                props: {
+                                    'class': 'btn-group'
+                                },
+                                content: [{
+                                        tag: 'button',
+                                        props: {
+                                            'class': 'btn btn-default',
+                                            value: 'vertical'
+                                        },
+                                        content: "Vertical",
+                                        events: {
+                                            click: '{#_vertical}'
+                                        }
+                                    }, {
+                                        tag: 'button',
+                                        props: {
+                                            'class': 'btn btn-default',
+                                            value: 'horizontal'
+                                        },
+                                        content: "Horizontal",
+                                        events: {
+                                            click: '{#_horizontal}'
+                                        }
+                                    }, {
+                                        tag: 'button',
+                                        props: {
+                                            'class': 'btn btn-default',
+                                            value: 'enterprise'
+                                        },
+                                        content: "Layers",
+                                        events: {
+                                            click: '{#_enterprise}',
+                                        }
+                                    }, {
+                                        tag: 'button',
+                                        props: {
+                                            'class': 'btn btn-default',
+                                            value: 'random'
+                                        },
+                                        content: "Chaos",
+                                        events: {
+                                            click: '{#_force}'
+                                        }
+                                    }
+                                ],
+
+                            }, {
                                 tag: 'h5',
                                 content: "Display icons as dots :"
                             }, {
@@ -26574,7 +26648,60 @@ var nx = {
                 var nodes = topo.selectedNodes().toArray();
                 topo.selectedNodes().clear();
                 topo.aggregationNodes(nodes);
-            }
+            },
+
+            hideGroups: function() {
+              var topology = this.topology();
+              var groups = document.getElementsByTagName('g');
+              objects = document.querySelectorAll('[data-nx-type="Anonymous"]');
+              for (var i = 0; i < objects.length; i++) {
+                objects[i].style.display = 'none';
+              }
+              //var groupsLayer = topology.getLayer("groups")
+              //groupsLayer.removeGroup(groups);
+            },
+
+            _horizontal: function() {
+                var topology = this.topology();
+                var layout = topology.getLayout('hierarchicalLayout');
+                this.hideGroups();
+                layout.direction('horizontal');
+                layout.sortOrder(['0','1','2','3','spine', 'leaf','servers']);
+                layout.levelBy(function(node, model) {
+                  return model.get('level');
+                });
+                topology.activateLayout('hierarchicalLayout');
+            },
+
+            _vertical: function() {
+              var topology = this.topology();
+              var layout = topology.getLayout('hierarchicalLayout');
+              this.hideGroups();
+              layout.direction('vertical');
+              layout.sortOrder(['0','1','2','3','spine', 'leaf','servers']);
+              layout.levelBy(function(node, model) {
+                return model.get('level');
+              });
+              topology.activateLayout('hierarchicalLayout');
+            },
+
+            _enterprise: function() {
+              var topology = this.topology();
+              var layout = topology.getLayout('enterpriseNetworkLayout');
+              layout.direction('vertical');
+              layout.sortOrder(['0','1','2','3','spine', 'leaf','servers']);
+              layout.levelBy(function(node, model) {
+                return model.get('level');
+              });
+              topology.activateLayout('enterpriseNetworkLayout');
+            },
+
+            _force: function() {
+              var topology = this.topology();
+              this.hideGroups();
+              topology.activateLayout('force');
+            },
+
         }
     });
 
